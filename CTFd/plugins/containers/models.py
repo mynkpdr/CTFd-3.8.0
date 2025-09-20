@@ -13,14 +13,9 @@ class ContainerChallengeModel(Challenges):
     command = db.Column(db.Text, default="")
     volumes = db.Column(db.Text, default="")
 
-    # Dynamic challenge properties
-    initial = db.Column(db.Integer, default=0)
-    minimum = db.Column(db.Integer, default=0)
-    decay = db.Column(db.Integer, default=0)
-
     def __init__(self, *args, **kwargs):
         super(ContainerChallengeModel, self).__init__(**kwargs)
-        self.value = kwargs["initial"]
+        self.value = kwargs["value"]
 
 
 class ContainerInfoModel(db.Model):
