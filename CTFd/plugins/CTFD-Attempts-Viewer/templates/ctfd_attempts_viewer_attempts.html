@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <h1 class="mb-4">Attempt History <a href="/challenges" class="btn btn-outline-secondary">
+  ← Back to challenges
+</a> </h1>
+<p>Below you will find the attempts made by your team on the different challenges during the event.</p>  
+<hr><br><br>
+
+<!--  Filter bar -->
+<div class="d-flex gap-4 flex-wrap align-items-end mb-4">
+  <div>
+    <label for="challenge-filter" class="form-label fw-bold">Filter by challenge:</label>
+    <select id="challenge-filter" class="form-control" style="min-width: 200px;">
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="user-filter" class="form-label fw-bold">Filter by player:</label>
+    <select id="user-filter" class="form-control" style="min-width: 200px;">
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="type-filter" class="form-label fw-bold">Filter by status:</label>
+    <select id="type-filter" class="form-control" style="min-width: 150px;">
+      <option value="all">All</option>
+      <option value="correct">✅ Correct</option>
+      <option value="incorrect">❌ Incorrect</option>
+    </select>
+  </div>
+</div>
+<br>
+<div id="attempts-container"></div>
+<div id="pagination" class="mt-4"></div>
+<br><br>
+<footer>
+  <p style="text-align: center;">
+    <a href="https://hackolyte.fr/">
+      <img src="https://hackolyte.fr/wp-content/uploads/2024/09/cropped-cropped-logo.png" alt="Hack'olyte logo" style="height: 30px; vertical-align: middle; margin-right: 5px;">
+    </a>
+    Plugin developed by the <a href="https://hackolyte.fr/">Hack'olyte</a> association - v1.3
+  </p>
+</footer>
+
+<script>
+(async () => {
+  const container = document.getElementById("attempts-container");
+  const pagination = document.getElementById("pagination");
+  const filterSelect = document.getElementById("challenge-filter");
+  const userFilter = document.getElementById("user-filter");
+  const typeFilter = document.getElementById("type-filter");
+
+  const PAGE_SIZE = 10;
+  let currentPage = 1;
+  let submissions = [];
+  let filteredSubs = [];
+
+  function renderPage(page) {
+    // Vider le container de manière sécurisée
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    const start = (page - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const pageData = filteredSubs.slice(start, end);
+
+    const responsiveDiv = document.createElement("div");
+    responsiveDiv.className = "table-responsive";
+
+    const table = document.createElement("table");
+    table.className = "table table-striped table-bordered";
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    ["Player", "Challenge", "Attempted answer", "Correct answer?", "Submission date"].forEach(header => {
+      const th = document.createElement("th");
+      th.textContent = header;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    pageData.forEach(sub => {
+      const tr = document.createElement("tr");
+
+      const tdUser = document.createElement("td");
+      tdUser.textContent = sub.user_name;
+      tr.appendChild(tdUser);
+
+      const tdChallenge = document.createElement("td");
+      tdChallenge.textContent = sub.challenge_name;
+      tr.appendChild(tdChallenge);
+
+      const tdSubmission = document.createElement("td");
+      const isGeo = sub.submission.includes("lat:");
+
+      if (isGeo) {
+        const span = document.createElement("span");
+        span.textContent = sub.submission;
+        tdSubmission.appendChild(span);
+      } else {
+        const icon = document.createElement("i");
+        icon.className = "fas fa-clipboard me-2 text-primary";
+        icon.title = "Copy";
+        icon.style.cursor = "pointer";
+
+        icon.addEventListener("click", () => {
+          navigator.clipboard.writeText(sub.submission).then(() => {
+            icon.style.color = "#28a745";
+            setTimeout(() => { icon.style.color = ""; }, 1000);
+          });
+        });
+
+        tdSubmission.appendChild(icon);
+        const textNode = document.createTextNode(" " + sub.submission);
+        tdSubmission.appendChild(textNode);
+      }
+      tr.appendChild(tdSubmission);
+
+      const tdType = document.createElement("td");
+      tdType.textContent = sub.type === "correct" ? "✅ Yes" : "❌ No";
+      tr.appendChild(tdType);
+
+      const tdDate = document.createElement("td");
+      tdDate.textContent = new Date(sub.date).toLocaleString();
+      tr.appendChild(tdDate);
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    responsiveDiv.appendChild(table);
+    container.appendChild(responsiveDiv);
+
+    // Pagination - vider de manière sécurisée
+    while (pagination.firstChild) {
+      pagination.removeChild(pagination.firstChild);
+    }
+    
+    const totalPages = Math.ceil(filteredSubs.length / PAGE_SIZE);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-sm " + (i === page ? "btn-primary" : "btn-outline-primary") + " mx-1";
+      btn.textContent = i;
+
+      btn.addEventListener("click", () => {
+        currentPage = i;
+        renderPage(i);
+      });
+
+      pagination.appendChild(btn);
+    }
+  }
+
+  function applyFilter() {
+    const selectedChallenge = filterSelect.value;
+    const selectedUser = userFilter.value;
+    const selectedType = typeFilter.value;
+
+    filteredSubs = submissions.filter(sub => {
+      const matchChallenge = selectedChallenge === "all" || sub.challenge_id.toString() === selectedChallenge;
+      const matchUser = selectedUser === "all" || sub.user_name === selectedUser;
+      const matchType = selectedType === "all" || sub.type === selectedType;
+      return matchChallenge && matchUser && matchType;
+    });
+
+    currentPage = 1;
+    renderPage(currentPage);
+  }
+
+  try {
+    const res = await fetch("/attempts-viewer/api/my-team-submissions");
+    const result = await res.json();
+    if (!result.success || !result.data.length) {
+      container.textContent = "No attempts found for your team!";
+      return;
+    }
+
+    submissions = result.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Challenges
+    const challengeMap = {};
+    submissions.forEach(sub => {
+      challengeMap[sub.challenge_id] = sub.challenge_name;
+    });
+    Object.entries(challengeMap).forEach(([id, name]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = name;
+      filterSelect.appendChild(option);
+    });
+
+    // Users
+    const userSet = new Set(submissions.map(s => s.user_name));
+    userSet.forEach(user => {
+      const option = document.createElement("option");
+      option.value = user;
+      option.textContent = user;
+      userFilter.appendChild(option);
+    });
+
+    filterSelect.addEventListener("change", applyFilter);
+    userFilter.addEventListener("change", applyFilter);
+    typeFilter.addEventListener("change", applyFilter);
+
+    applyFilter();
+
+  } catch (err) {
+    console.error("❌ API Error:", err);
+    // Create alert safely
+    const alertDiv = document.createElement("div");
+    alertDiv.className = "alert alert-danger";
+    alertDiv.textContent = "Error loading data.";
+    container.appendChild(alertDiv);
+  }
+})();
+</script>
+
+</div>
+{% endblock %}

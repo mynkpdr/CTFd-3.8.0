@@ -1,0 +1,61 @@
+services:
+  ctfd:
+    build: .
+    user: root
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=postgresql+psycopg2://ctfd:ctfd@db/ctfd
+      # - REDIS_URL=redis://cache:6379
+      - WORKERS=1
+      - LOG_FOLDER=/var/log/CTFd
+      - ACCESS_LOG=/var/log/CTFd/access.log
+      - ERROR_LOG=/var/log/CTFd/error.log
+      - REVERSE_PROXY=true
+      - PRESET_CONFIGS={"setup":true,"ctf_name":"HACK2BREAK","ctf_description":"Welcome to Hack2Break 2025","ctf_theme":"pixo","user_mode":"teams","challenge_visibility":"private","registration_visibility":"public","score_visibility":"public","account_visibility":"public"}
+    volumes:
+      - .data/CTFd/logs:/var/log/CTFd
+      - .data/CTFd/uploads:/var/uploads
+      - .:/opt/CTFd
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+    networks:
+        default:
+        internal:
+
+  nginx:
+    image: nginx:stable
+    restart: always
+    volumes:
+      - ./conf/nginx/http.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+    depends_on:
+      - ctfd
+
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_USER=ctfd
+      - POSTGRES_PASSWORD=ctfd
+      - POSTGRES_DB=ctfd
+    volumes:
+      - .data/postgres:/var/lib/postgresql/data
+    networks:
+        internal:
+  # cache:
+  #   image: redis:4
+  #   restart: always
+  #   volumes:
+  #   - .data/redis:/data
+  #   networks:
+  #       internal:
+
+networks:
+    default:
+    internal:
+        internal: true

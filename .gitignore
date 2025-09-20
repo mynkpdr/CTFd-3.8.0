@@ -1,0 +1,39 @@
+__pycache__/
+env/
+venv*
+.venv*
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+
+*.db
+*.log
+*.log.*
+.idea/
+.vscode/
+CTFd/static/uploads
+CTFd/uploads
+.data/
+.ctfd_secret_key
+.*.swp
+
+# CTFd Exports
+*.zip
+
+# JS
+node_modules/
+
+# Flask Profiler files
+flask_profiler.sql
