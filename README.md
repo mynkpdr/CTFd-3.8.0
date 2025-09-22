@@ -49,7 +49,7 @@ A production-ready, modded version of [CTFd 3.8.0](https://github.com/CTFd/CTFd)
 - **Security hardening** and stability improvements
 - **Enhanced error handling** and logging
 
-## � Docker Hub
+##  Docker Hub
 
 **Pre-built Docker Image**: [`mynkpdr/ctfd`](https://hub.docker.com/r/mynkpdr/ctfd)
 
@@ -62,9 +62,7 @@ docker run -d -p 8000:8000 mynkpdr/ctfd:latest
 Available tags:
 - `latest` - Production-ready stable release
 
-For comprehensive Docker deployment instructions, environment variables, and production configurations, see **[DOCKER_OVERVIEW.md](DOCKER_OVERVIEW.md)**.
-
-## �📋 Requirements
+## 📋 Requirements
 
 - **Python**: 3.8+
 - **Docker**: For containerized deployment
