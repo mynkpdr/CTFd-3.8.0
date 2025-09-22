@@ -111,8 +111,6 @@ volumes:
   db_data:
 ```
 
-📋 **For complete Docker deployment guide, see [DOCKER_OVERVIEW.md](DOCKER_OVERVIEW.md)**
-
 ### Building from Source
 
 1. **Clone the repository**
@@ -234,19 +232,18 @@ This project maintains the same license as the original CTFd project. Please ref
 
 This is a modded version for production use. For contributions to the base CTFd platform, please visit the [official CTFd repository](https://github.com/CTFd/CTFd).
 
-## � Links & Resources
+## Links & Resources
 
 - **🐳 Docker Hub**: [`mynkpdr/ctfd`](https://hub.docker.com/r/mynkpdr/ctfd)
-- **📖 Docker Deployment Guide**: [DOCKER_OVERVIEW.md](DOCKER_OVERVIEW.md)
 - **🏠 Original CTFd**: [github.com/CTFd/CTFd](https://github.com/CTFd/CTFd)
 - **📚 CTFd Documentation**: [docs.ctfd.io](https://docs.ctfd.io/)
 - **🎨 Pixo Theme**: [github.com/hmrserver/CTFd-theme-pixo](https://github.com/hmrserver/CTFd-theme-pixo)
-- **🔌 Attempts Viewer**: [github.com/HACK-OLYTE/CTFD-Attempts-Viewer](https://github.com/HACK-OLYTE/CTFD-Attempts-Viewer)
+- **🔌 Attempts Viewer**: [github.com/HACK-OLYTE/CTFD-Attempts-Viewer](https://github.com/HACK-OLYTE/CTFD-Attempts-Viewer) (Translated to English)
 
-## �📞 Support
+## 📞 Support
 
 For issues specific to these modifications and enhancements, please create an issue in this repository. For general CTFd questions, refer to the [official CTFd documentation](https://docs.ctfd.io/).
 
 ---
 
-**Built for CTF enthusiasts, by CTF enthusiasts** 🏴‍☠️
+**With 💘 Mayank**
